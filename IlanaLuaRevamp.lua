@@ -26,9 +26,11 @@ util.toast("Loaded ilanas skidded script !\nYou're a "..YOURUSERNAME.."")
 --end load text
 
 --Begin Change+Ver Log
-menu.readonly(LogRoot, "Reworking the entire script")
+
+menu.readonly(LogRoot, "Some Features are still missing,.")
+menu.readonly(LogRoot, "Reworking Script Still.")
 menu.divider(LogRoot, "Script Version")
-menu.readonly(LogRoot, "version 0.0.1")
+menu.readonly(LogRoot, "version 0.0.2")
 --end change+ver log
 
 --Begin credits
@@ -43,6 +45,11 @@ end)
 menu.action(CreditRoot, "Icy+Vsus", {""}, "", function(on_click)
 	util.toast("Huge thanks to vsus/ren and IcyPhoneix for making MB in the first place.")
 end)
+
+menu.action(CreditRoot, "Andy", {""}, "", function(on_click)
+    util.toast("Big thanks for the help aswell as teaching me certain things.")
+end) 
+
 --End Credits
 
 -----------------------------------------------------------------------------------------------------------------------------------------
@@ -90,12 +97,25 @@ menu.toggle_loop(MoneyRoot, "Remove transaction pending", {"Transaction pending"
     menu.trigger_commands("removetransactionpending")
 end)
 
---End mb cargo help
+menu.action(MoneyRoot, "Source Crates", {"sourcecrate"}, "", function()
+    if util.is_session_started() and not util.is_session_transition_active() then
+        STATS._SET_PACKED_STAT_BOOL(32359 + 0 --[[value from 0-4 depending on current active warehouse.]], true, util.get_char_slot())
+        memory.write_int(memory.script_global(2689235 + 1 + (players.user() * 453) + 318 + 6), -1)
+    end
+end)
 
 
+menu.toggle_loop(MoneyRoot, "Source Loop", {"sourceloop"}, "", function(on_click)
+    menu.trigger_commands("sourcecrate", 111)
+    util.yield(2000)
+end)
 
-
-
+menu.toggle_loop(MoneyRoot, "No RP", {"NoRP"}, "", function(on_click)
+    util.draw_debug_text("RP Disabled")
+    memory.write_float(memory.script_global(262145 + 1), 0)
+end, function()
+    memory.write_float(memory.script_global(262145 + 1), 1)
+end)
 
 
 
