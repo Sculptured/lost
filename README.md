@@ -1,3 +1,3 @@
 # lost
 
-this is just some random shitty stand lua script i'll be just randomly doing tbh.
+a collaborative stand lua made by jesus + ilana with a fuck ton of help from other sources.
