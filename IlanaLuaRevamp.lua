@@ -1,6 +1,7 @@
 --HUGE THANKS TO CHRIS LAD. (orignal uploader.)
 --Silent#7114 you're not a dev, you're a skid without the capabilties to credit people < Also telling people to kys ins't great.
-
+--Thanks andy for helping me figure out a loop to then get this to where its at now.
+--Thanks jesus for not only coming in and not only debugging but becoming a second helping hands on this project <3
 
 util.keep_running()
 util.require_natives(1651208000)
@@ -13,8 +14,8 @@ MenuR = menu.my_root()
 --root list
 menu.divider(menu.my_root(), "Special Crate related")
 MoneyRoot = MenuL(MenuR, "Money Making", {}, "")
-NightRoot = MenuL(MenuR, "Overnight money", {}, "For if you're really lazy and dont wanna use MB.")
-MiscRoot = MenuL(MenuR, "Misc")
+GenRoot = MenuL(MenuR, "General Features", {}, "random stuff i threw in here.")
+TpRoot = MenuL(MenuR, "Teleports")
 LogRoot = menu.list(menu.my_root(), "Change Log", {}, "Change log + Version. ")
 CreditRoot = MenuL(MenuR, "Credits", {}, "People who helped/supported.")
 
@@ -25,12 +26,14 @@ local YOURUSERNAME = "kool kid"
 util.toast("Loaded ilanas skidded script !\nYou're a "..YOURUSERNAME.."")
 --end load text
 
---Begin Change+Ver Log
+-----------------------------------------------------------------------------------------------------------------------------------------
 
-menu.readonly(LogRoot, "Some Features are still missing,.")
-menu.readonly(LogRoot, "Reworking Script Still.")
+--Begin Change+Ver Log
+menu.readonly(LogRoot, "Implementing new features")
+menu.readonly(LogRoot, "added sell delays")
+menu.readonly(LogRoot, "stabalised sell loop slightly")
 menu.divider(LogRoot, "Script Version")
-menu.readonly(LogRoot, "version 0.0.2")
+menu.readonly(LogRoot, "version 0.0.4")
 --end change+ver log
 
 --Begin credits
@@ -47,35 +50,45 @@ menu.action(CreditRoot, "Icy+Vsus", {""}, "", function(on_click)
 end)
 
 menu.action(CreditRoot, "Andy", {""}, "", function(on_click)
-    util.toast("Big thanks for the help aswell as teaching me certain things.")
+    util.toast("Big thanks to Anwy for the help aswell as teaching me certain things.")
 end) 
+
+menu.action(CreditRoot, "Jesus", {""}, "", function(on_click)
+    util.toast("Thank you Jesus_is_cap for helping with coding + debugging!")
+end)
+
+menu.action(CreditRoot, "Ren", {""}, "", function(on_click)
+    util.toast("Thank you Ren for the motivation to work on this. <3")
+end)
 
 --End Credits
 
 -----------------------------------------------------------------------------------------------------------------------------------------
 
---Start Misc Section
-menu.divider(MiscRoot, "FPS TPs to stop transError")
-menu.action(MiscRoot, "TP | Hanger", {"tphanger"}, "", function(on_click)
+--Start tp Section
+menu.divider(TpRoot, "FPS TPs to stop transError")
+menu.action(TpRoot, "TP | Hanger", {"tphanger"}, "", function(on_click)
 	local me = PLAYER.PLAYER_PED_ID()
 	ENTITY.SET_ENTITY_COORDS_NO_OFFSET(me, -930.89166, -2947.7917, 25.594482, 0, 0, 0)
 end)
 
-menu.action(MiscRoot, "TP | Gods Thumb", {"tpgodthumb"}, "", function(on_click)
+menu.action(TpRoot, "TP | Gods Thumb", {"tpgodthumb"}, "", function(on_click)
 	local me = PLAYER.PLAYER_PED_ID()
 	ENTITY.SET_ENTITY_COORDS_NO_OFFSET(me, -986.18774, 6253.837, 2.682039, 0, 0, 0)
 end)
 
-menu.action(MiscRoot, "TP | Cable Cart", {"tpcable"}, "", function(on_click)
+menu.action(TpRoot, "TP | Cable Cart", {"tpcable"}, "", function(on_click)
 	local me = PLAYER.PLAYER_PED_ID()
 	ENTITY.SET_ENTITY_COORDS_NO_OFFSET(me, 413.31113, 5572.6914, 779.84125, 0, 0, 0)
 end)
 
-menu.action(MiscRoot, "TP | Avi's hut", {"tpavihut"}, "", function(on_click)
+menu.action(TpRoot, "TP | Avi's hut", {"tpavihut"}, "", function(on_click)
 	local me = PLAYER.PLAYER_PED_ID()
 	ENTITY.SET_ENTITY_COORDS_NO_OFFSET(me, -2169.1309, 5195.2827, 16.880398, 0, 0, 0)
 end)
---End misc Section
+--End tp Section
+
+-----------------------------------------------------------------------------------------------------------------------------------------------
 
 --Start Jerry Script Skidded Code
 local Int_PTR = memory.alloc_int()
@@ -91,23 +104,31 @@ local Int_PTR = memory.alloc_int()
 
 --End Jerry Script Skidded Code
 
+-----------------------------------------------------------------------------------------------------------------------------------------------
 
 --Start MB cargo Help 
+
+function resupply()
+    STATS._SET_PACKED_STAT_BOOL(32359 + 0, true,  util.get_char_slot())
+    memory.write_int(memory.script_global(2689235 + 1 + (players.user() * 453) + 318 + 6), -1)
+end
+
 menu.toggle_loop(MoneyRoot, "Remove transaction pending", {"Transaction pending"}, "Use if Transaction pending is fucking with you", function(on_click)
     menu.trigger_commands("removetransactionpending")
 end)
 
-menu.action(MoneyRoot, "Source Crates", {"sourcecrate"}, "", function()
-    if util.is_session_started() and not util.is_session_transition_active() then
-        STATS._SET_PACKED_STAT_BOOL(32359 + 0 --[[value from 0-4 depending on current active warehouse.]], true, util.get_char_slot())
-        memory.write_int(memory.script_global(2689235 + 1 + (players.user() * 453) + 318 + 6), -1)
-    end
+    menu.slider(MoneyRoot, "Sell Speed)", {"mbcspeed"}, "Modify Sell Speed (in miliseconds)",1000,4000, tonumber(0),25 ,function(speed_value)
+    util.yield()
+    speed = speed_value
 end)
 
-
-menu.toggle_loop(MoneyRoot, "Source Loop", {"sourceloop"}, "", function(on_click)
-    menu.trigger_commands("sourcecrate", 111)
-    util.yield(2000)
+menu.toggle_loop(MoneyRoot, "Crate Sell Loop", {"sourceloop"}, "Make sure to set a loop speed before enabling this", function(on_click)
+    menu.trigger_commands("sellacrate")
+    util.yield(speed)
+    if STAT_GET_INT("CONTOTALFORWHOUSE0",12) <= 5 then
+    util.yield(0)
+    resupply()
+end
 end)
 
 menu.toggle_loop(MoneyRoot, "No RP", {"NoRP"}, "", function(on_click)
@@ -117,13 +138,31 @@ end, function()
     memory.write_float(memory.script_global(262145 + 1), 1)
 end)
 
+menu.action(MoneyRoot, "Source Crates", {"sourcecrate"}, "", function()
+    if util.is_session_started() and not util.is_session_transition_active() then
+        STATS._SET_PACKED_STAT_BOOL(32359 + 0, true, util.get_char_slot())
+        memory.write_int(memory.script_global(2689235 + 1 + (players.user() * 453) + 318 + 6), -1)
+    end
+end)
+--End MB cargo  help 
+
+-----------------------------------------------------------------------------------------------------------------------------------------------
+
+--Start GenStuff (thanks andyscript/andy as i dont know what to do for this)
 
 
+menu.action(GenRoot, "Max Health", {"healself"}, "Heals your ped to its max health.",
+function()
+    local max_health = ENTITY.GET_ENTITY_MAX_HEALTH(players.user_ped())
+    ENTITY.SET_ENTITY_HEALTH(players.user_ped(), max_health, 0)
+end
+)
 
 
-
-
-
-
+menu.action(GenRoot, "Clean", {"cleanself"}, "Cleans your ped from all visible blood.",
+function()
+    PED.CLEAR_PED_BLOOD_DAMAGE(players.user_ped())
+end
+)
 
 
